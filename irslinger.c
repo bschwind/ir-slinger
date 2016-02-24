@@ -124,8 +124,6 @@ int sendCode(uint32_t outPin,
 	// Start a new wave
 	gpioWaveClear();
 
-	sleep(1);
-
 	gpioWaveAddGeneric(pulseCount, irSignal);
 	int waveID = gpioWaveCreate();
 
