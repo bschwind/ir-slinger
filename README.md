@@ -7,6 +7,10 @@ Dependencies
 ------------
 
 * [libpigpio](https://github.com/joan2937/pigpio)
+  * git clone https://github.com/joan2937/pigpio.git
+  * cd pigpio
+  * make
+  * sudo make install
 
 Build
 -----
