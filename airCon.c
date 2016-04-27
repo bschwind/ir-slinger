@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include "irslinger.h"
 
@@ -15,6 +16,11 @@ int main(int argc, char *argv[])
 	int zeroGap = 450;
 	int sendTrailingPulse = 1;
 
+	if (argc < 2)
+	{
+		exit(1);
+	}
+
 	int result = sendCode(
 		outPin,
 		frequency,
@@ -26,7 +32,7 @@ int main(int argc, char *argv[])
 		oneGap,
 		zeroGap,
 		sendTrailingPulse,
-		"100000000000100000000000000000101111110111111111000000000011001111001100010010011011011011001000001101110000011011111001000000001111111100000000111111110000000011111111000000001111111100000000111111110110101010010101100010110111010000000000111111110000000011111111");
+		argv[1]);
 	
 	return result;
 }
