@@ -19,11 +19,14 @@ Dependencies
 Build
 -----
 
-    gcc test.c -lm -lpigpio -pthread
+    gcc test.c -lm -lpigpio -pthread -lrt
 
 Or
 
-    clang test.c -lm -lpigpio -pthread
+    clang test.c -lm -lpigpio -pthread -lrt
+
+The `-lrt` technically isn't necessary for most versions of gcc and clang,
+but I needed it to get Travis CI's compilers working.
 
 Usage
 -----
