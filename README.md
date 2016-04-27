@@ -1,6 +1,8 @@
 IR Slinger
 ==========
 
+[![Build Status](https://travis-ci.org/bschwind/ir-slinger.svg?branch=travis)](https://travis-ci.org/bschwind/ir-slinger)
+
 Small C library for sending NEC-like infrared packets on the Raspberry Pi
 This is a header-only library. Use it by including "irslinger.h" and
 linking to libmath, pigpio, and pthread (-lm -lpigpio -pthread)
