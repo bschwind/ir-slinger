@@ -31,7 +31,7 @@ but I needed it to get Travis CI's compilers working.
 Usage
 -----
 
-```
+```c
 #include <stdio.h>
 #include "irslinger.h"
 
