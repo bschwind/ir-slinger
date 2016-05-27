@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
 	int frequency = 38000;           // The frequency of the IR signal in Hz
 	double dutyCycle = 0.5;          // The duty cycle of the IR signal. 0.5 means for every cycle,
 	                                 // the LED will turn on for half the cycle time, and off the other half
-	int leadingPulseDuration = 9000; // The duration of the beginning NEC pulse in microseconds
-	int leadingGapDuration = 4500;   // The duration of the gap in microseconds after the leading NEC pulse
+	int leadingPulseDuration = 9000; // The duration of the beginning pulse in microseconds
+	int leadingGapDuration = 4500;   // The duration of the gap in microseconds after the leading pulse
 	int onePulse = 562;              // The duration of a pulse in microseconds when sending a logical 1
 	int zeroPulse = 562;             // The duration of a pulse in microseconds when sending a logical 0
 	int oneGap = 1688;               // The duration of the gap in microseconds when sending a logical 1
