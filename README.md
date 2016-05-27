@@ -5,7 +5,7 @@ IR Slinger
 
 Small C library for sending infrared packets on the Raspberry Pi
 This is a header-only library. Use it by including "irslinger.h" and
-linking to libmath, pigpio, and pthread (-lm -lpigpio -pthread)
+linking to libmath, pigpio, and pthread (`-lm -lpigpio -pthread`)
 
 Dependencies
 ------------
