@@ -12,3 +12,4 @@ before_install:
 
 script:
   - $CC test.c -lm -lpigpio -pthread -lrt
+  - $CC testRawCodes.c -lm -lpigpio -pthread -lrt
