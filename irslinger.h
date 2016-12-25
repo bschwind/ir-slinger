@@ -233,4 +233,123 @@ static inline int irSlingRaw(uint32_t outPin,
 	return 0;
 }
 
+static inline int irSlingRawPrefix(uint32_t outPin,
+	int frequency,
+	double dutyCycle,
+	const int *pulses,
+	int numPulses,
+	int leadingPulseDuration, // Non-raw input
+	int leadingGapDuration,
+	int onePulse,
+	int zeroPulse,
+	int oneGap,
+	int zeroGap,
+	int sendTrailingPulse,
+	const char *code)
+{
+	if (outPin > 31)
+	{
+		// Invalid pin number
+		return 1;
+	}
+
+	size_t codeLen = strlen(code);
+
+	printf("code size is %zu\n", codeLen);
+
+	if (codeLen > MAX_COMMAND_SIZE)
+	{
+		// Command is too big
+		return 1;
+	}
+
+	// Generate Raw Code
+	gpioPulse_t irSignal[MAX_PULSES];
+	int pulseCount = 0;
+
+	int i;
+	for (i = 0; i < numPulses; i++)
+	{
+		if (i % 2 == 0) {
+			carrierFrequency(outPin, frequency, dutyCycle, pulses[i], irSignal, &pulseCount);
+		} else {
+			gap(outPin, pulses[i], irSignal, &pulseCount);
+		}
+	}
+
+	// End Generate Raw Code
+
+	// Generate String Code
+	carrierFrequency(outPin, frequency, dutyCycle, leadingPulseDuration, irSignal, &pulseCount);
+	gap(outPin, leadingGapDuration, irSignal, &pulseCount);
+
+	for (; i < codeLen; i++)
+	{
+		if (code[i] == '0')
+		{
+			carrierFrequency(outPin, frequency, dutyCycle, zeroPulse, irSignal, &pulseCount);
+			gap(outPin, zeroGap, irSignal, &pulseCount);
+		}
+		else if (code[i] == '1')
+		{
+			carrierFrequency(outPin, frequency, dutyCycle, onePulse, irSignal, &pulseCount);
+			gap(outPin, oneGap, irSignal, &pulseCount);
+		}
+		else
+		{
+			printf("Warning: Non-binary digit in command\n");
+		}
+	}
+
+	if (sendTrailingPulse)
+	{
+		carrierFrequency(outPin, frequency, dutyCycle, onePulse, irSignal, &pulseCount);
+	}
+	// End Generate String Code
+
+	// Init pigpio
+	if (gpioInitialise() < 0)
+	{
+		// Initialization failed
+		printf("GPIO Initialization failed\n");
+		return 1;
+	}
+
+	// Setup the GPIO pin as an output pin
+	gpioSetMode(outPin, PI_OUTPUT);
+
+	// Start a new wave
+	gpioWaveClear();
+
+	gpioWaveAddGeneric(pulseCount, irSignal);
+	int waveID = gpioWaveCreate();
+
+	if (waveID >= 0)
+	{
+		int result = gpioWaveTxSend(waveID, PI_WAVE_MODE_ONE_SHOT);
+
+		printf("Result: %i\n", result);
+	}
+	else
+	{
+		printf("Wave creation failure!\n %i", waveID);
+	}
+
+	// Wait for the wave to finish transmitting
+	while (gpioWaveTxBusy())
+	{
+		time_sleep(0.1);
+	}
+
+	// Delete the wave if it exists
+	if (waveID >= 0)
+	{
+		gpioWaveDelete(waveID);
+	}
+
+	// Cleanup
+	gpioTerminate();
+	return 0;
+}
+
 #endif
