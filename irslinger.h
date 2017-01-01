@@ -283,7 +283,7 @@ static inline int irSlingRawPrefix(uint32_t outPin,
 	carrierFrequency(outPin, frequency, dutyCycle, leadingPulseDuration, irSignal, &pulseCount);
 	gap(outPin, leadingGapDuration, irSignal, &pulseCount);
 
-	for (; i < codeLen; i++)
+	for (i = 0; i < codeLen; i++)
 	{
 		if (code[i] == '0')
 		{
