@@ -109,13 +109,13 @@ class NEC():
     # Generate zero or one in NEC protocol
     # Zero is represented by a pulse and a gap of the same length
     def zero(self):
-        self.wave_generator.one(self.one_pulse_duration)
-        self.wave_generator.zero(self.zero_pulse_duration)
+        self.wave_generator.one(self.zero_pulse_duration)
+        self.wave_generator.zero(self.zero_gap_duration)
 
     # One is represented by a pulse and a gap three times longer than the pulse
     def one(self):
-        self.wave_generator.one(self.zero_pulse_duration)
-        self.wave_generator.zero(self.zero_gap_duration)
+        self.wave_generator.one(self.one_pulse_duration)
+        self.wave_generator.zero(self.one_gap_duration)
 
 # RC-5 protocol class
 # Note: start bits are not implemented here due to inconsistency between manufacturers.
@@ -154,12 +154,12 @@ class RC5():
     # Generate zero or one in RC-5 protocol
     # Zero is represented by pulse-then-low signal
     def zero(self):
-        self.wave_generator.one(self.one_duration)
+        self.wave_generator.one(self.zero_duration)
         self.wave_generator.zero(self.zero_duration)
 
     # One is represented by low-then-pulse signal
     def one(self):
-        self.wave_generator.zero(self.zero_duration)
+        self.wave_generator.zero(self.one_duration)
         self.wave_generator.one(self.one_duration)
 
 # RAW IR ones and zeroes. Specify length for one and zero and simply bitbang the GPIO.
