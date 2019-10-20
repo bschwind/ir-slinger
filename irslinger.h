@@ -52,6 +52,105 @@ static inline void gap(uint32_t outPin, double duration, gpioPulse_t *irSignal, 
 	addPulse(0, 0, duration, irSignal, pulseCount);
 }
 
+// Transmit generated wave
+static inline int transmitWave(uint32_t outPin, gpioPulse_t *irSignal, unsigned int *pulseCount)
+{
+	// Init pigpio
+	if (gpioInitialise() < 0)
+	{
+		// Initialization failed
+		printf("GPIO Initialization failed\n");
+		return 1;
+	}
+
+	// Setup the GPIO pin as an output pin
+	gpioSetMode(outPin, PI_OUTPUT);
+
+	// Start a new wave
+	gpioWaveClear();
+
+	gpioWaveAddGeneric(*pulseCount, irSignal);
+	int waveID = gpioWaveCreate();
+
+	if (waveID >= 0)
+	{
+		int result = gpioWaveTxSend(waveID, PI_WAVE_MODE_ONE_SHOT);
+
+		printf("Result: %i\n", result);
+	}
+	else
+	{
+		printf("Wave creation failure!\n %i", waveID);
+	}
+
+	// Wait for the wave to finish transmitting
+	while (gpioWaveTxBusy())
+	{
+		time_sleep(0.1);
+	}
+
+	// Delete the wave if it exists
+	if (waveID >= 0)
+	{
+		gpioWaveDelete(waveID);
+	}
+
+	// Cleanup
+	gpioTerminate();
+	return 0;
+}
+
+static inline int irSlingRC5(uint32_t outPin,
+	int frequency,
+	double dutyCycle,
+	int pulseDuration,
+	const char *code)
+{
+	if (outPin > 31)
+	{
+		// Invalid pin number
+		return 1;
+	}
+
+	size_t codeLen = strlen(code);
+
+	printf("code size is %zu\n", codeLen);
+
+	if (codeLen > MAX_COMMAND_SIZE)
+	{
+		// Command is too big
+		return 1;
+	}
+
+	gpioPulse_t irSignal[MAX_PULSES];
+	int pulseCount = 0;
+
+	// Generate Code
+	int i;
+	for (i = 0; i < codeLen; i++)
+	{
+		if (code[i] == '0')
+		{
+			carrierFrequency(outPin, frequency, dutyCycle, pulseDuration, irSignal, &pulseCount);
+			gap(outPin, pulseDuration, irSignal, &pulseCount);
+		}
+		else if (code[i] == '1')
+		{
+			gap(outPin, pulseDuration, irSignal, &pulseCount);
+			carrierFrequency(outPin, frequency, dutyCycle, pulseDuration, irSignal, &pulseCount);
+		}
+		else
+		{
+			printf("Warning: Non-binary digit in command\n");
+		}
+	}
+
+	printf("pulse count is %i\n", pulseCount);
+	// End Generate Code
+
+	return transmitWave(outPin, irSignal, &pulseCount);
+}
+
 static inline int irSling(uint32_t outPin,
 	int frequency,
 	double dutyCycle,
@@ -114,49 +213,7 @@ static inline int irSling(uint32_t outPin,
 	printf("pulse count is %i\n", pulseCount);
 	// End Generate Code
 
-	// Init pigpio
-	if (gpioInitialise() < 0)
-	{
-		// Initialization failed
-		printf("GPIO Initialization failed\n");
-		return 1;
-	}
-
-	// Setup the GPIO pin as an output pin
-	gpioSetMode(outPin, PI_OUTPUT);
-
-	// Start a new wave
-	gpioWaveClear();
-
-	gpioWaveAddGeneric(pulseCount, irSignal);
-	int waveID = gpioWaveCreate();
-
-	if (waveID >= 0)
-	{
-		int result = gpioWaveTxSend(waveID, PI_WAVE_MODE_ONE_SHOT);
-
-		printf("Result: %i\n", result);
-	}
-	else
-	{
-		printf("Wave creation failure!\n %i", waveID);
-	}
-
-	// Wait for the wave to finish transmitting
-	while (gpioWaveTxBusy())
-	{
-		time_sleep(0.1);
-	}
-
-	// Delete the wave if it exists
-	if (waveID >= 0)
-	{
-		gpioWaveDelete(waveID);
-	}
-
-	// Cleanup
-	gpioTerminate();
-	return 0;
+	return transmitWave(outPin, irSignal, &pulseCount);
 }
 
 static inline int irSlingRaw(uint32_t outPin,
@@ -188,49 +245,7 @@ static inline int irSlingRaw(uint32_t outPin,
 	printf("pulse count is %i\n", pulseCount);
 	// End Generate Code
 
-	// Init pigpio
-	if (gpioInitialise() < 0)
-	{
-		// Initialization failed
-		printf("GPIO Initialization failed\n");
-		return 1;
-	}
-
-	// Setup the GPIO pin as an output pin
-	gpioSetMode(outPin, PI_OUTPUT);
-
-	// Start a new wave
-	gpioWaveClear();
-
-	gpioWaveAddGeneric(pulseCount, irSignal);
-	int waveID = gpioWaveCreate();
-
-	if (waveID >= 0)
-	{
-		int result = gpioWaveTxSend(waveID, PI_WAVE_MODE_ONE_SHOT);
-
-		printf("Result: %i\n", result);
-	}
-	else
-	{
-		printf("Wave creation failure!\n %i", waveID);
-	}
-
-	// Wait for the wave to finish transmitting
-	while (gpioWaveTxBusy())
-	{
-		time_sleep(0.1);
-	}
-
-	// Delete the wave if it exists
-	if (waveID >= 0)
-	{
-		gpioWaveDelete(waveID);
-	}
-
-	// Cleanup
-	gpioTerminate();
-	return 0;
+	return transmitWave(outPin, irSignal, &pulseCount);
 }
 
 #endif
